@@ -3,5 +3,5 @@ import { AdminController } from '../controller/AdminsController'
 
 export const adminsRouter = express.Router()
 
-adminsRouter.post('/create', new AdminController().createAdmin)
+adminsRouter.post('/signup', new AdminController().signup)
 adminsRouter.post('/login', new AdminController().login)

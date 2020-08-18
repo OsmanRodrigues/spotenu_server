@@ -1,17 +1,18 @@
 enum ROLE{
-  NORMAL = 'NORMAL',
-  ADMIN = 'ADMIN'
+  NORMAL='NORMAL',
+  ADMIN='ADMIN',
+  BAND='BAND'
 };
 
 interface AuthenticationData{
   id: string,
   name?: string,
   email?: string,
-  role?: ROLE | string,
-  device?: string,
+  role?: string,
+  device?: string
 };
 
-interface createAdminInfosDTO{
+interface CreateAdminInfosDTO{
   email: string,
   name: string,
   password: string,
@@ -19,13 +20,26 @@ interface createAdminInfosDTO{
   nickname?: string
 }
 
-interface loginAdminInfosDTO{
+interface SignupInfosDTO{
+  email: string,
+  name: string,
+  password: string,
+  id?: string,
+  nickname?: string,
+  description?: string,
+  subscriber?: boolean,
+  blocked?: boolean,
+  approved?: boolean,
+  members_quantity?: number
+}
+
+interface LoginInfosDTO{
   password: string,
   email?: string,
   nickname?: string
 }
 
-interface adminInfosDTO{
+interface AdminInfosDTO{
   id: string,
   email: string,
   name: string,
@@ -33,4 +47,12 @@ interface adminInfosDTO{
   password: string
 }
 
-export {ROLE, AuthenticationData, createAdminInfosDTO, loginAdminInfosDTO, adminInfosDTO}
+interface CheckPasswordInput{
+  hashedPassword: string,
+  plainPassword: string
+}
+
+export {
+  ROLE, AuthenticationData, CreateAdminInfosDTO, LoginInfosDTO, 
+  SignupInfosDTO, AdminInfosDTO, CheckPasswordInput
+}

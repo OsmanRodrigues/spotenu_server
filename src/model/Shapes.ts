@@ -19,4 +19,18 @@ interface createAdminInfosDTO{
   nickname?: string
 }
 
-export {ROLE, AuthenticationData, createAdminInfosDTO}
+interface loginAdminInfosDTO{
+  password: string,
+  email?: string,
+  nickname?: string
+}
+
+interface adminInfosDTO{
+  id: string,
+  email: string,
+  name: string,
+  nickname: string,
+  password: string
+}
+
+export {ROLE, AuthenticationData, createAdminInfosDTO, loginAdminInfosDTO, adminInfosDTO}

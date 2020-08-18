@@ -14,12 +14,33 @@ export class AdminController{
         nickname: body.nickname ? body.nickname : body.name
       } 
 
-      const result = await new AdminsBusiness().createAdmin(infos)
+      const result = await new AdminsBusiness().createAdmin(infos, body.token)
 
       res.status(200).send(result)
 
       await BaseDatabase.destroyConnection()
     }catch(error){
+      res.status(error.status) 
+      .send({
+        errorMessage: error.message
+      })
+    }
+  }
+
+  async login(req: Request, res: Response){
+    try{
+      const body = req.body
+
+      const result = await new AdminsBusiness().login({
+        password: body.password,
+        email: body.email,
+        nickname: body.nickname
+      })
+
+      res.status(200).send(result)
+
+      await BaseDatabase.destroyConnection()
+    }catch (error){
       res.status(error.status) 
       .send({
         errorMessage: error.message

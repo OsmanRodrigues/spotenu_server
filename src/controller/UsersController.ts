@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { AdminsBusiness } from "../business/AdminsBusiness";
 import { SignupInfosDTO, LoginInfosDTO } from "../model/Shapes";
 import { BaseDatabase } from "../model/BaseDatabase";
+import { UsersBusiness } from "../business/UsersBusiness";
 
-export class AdminController{
+export class UsersController{
   async signup(req: Request, res: Response): Promise<void>{
     try{
       const token = req.headers.authorization
@@ -12,10 +12,10 @@ export class AdminController{
         email: body.email,
         name: body.name,
         password: body.password,
-        nickname: body.nickname ? body.nickname : body.name
+        nickname: body.nickname
       } 
 
-      const result = await new AdminsBusiness().signup(infos, token)
+      const result = await new UsersBusiness().signup(infos, token)
 
       res.status(200).send(result)
 
@@ -28,6 +28,7 @@ export class AdminController{
     }
   }
 
+  //TODO: validar login
   async login(req: Request, res: Response){
     try{
       const body = req.body
@@ -36,7 +37,7 @@ export class AdminController{
         email: body.email,
         nickname: body.nickname
       }
-      const result = await new AdminsBusiness().login(infos)
+      const result = await new UsersBusiness().login(infos)
 
       res.status(200).send(result)
 

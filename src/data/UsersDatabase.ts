@@ -1,12 +1,12 @@
 import { BaseDatabase } from "../model/BaseDatabase";
-import { CreateAdminInfosDTO, AdminInfosDTO } from "../model/Shapes";
+import { CreateUserInfosDTO, UserInfosDTO } from "../model/Shapes";
 import { CustomError } from "../error/CustomError";
 
-export class AdminsDatabase extends BaseDatabase{
-  private tableName: string = process.env.TABLE_NAME_ADMINS as string
+export class UsersDatabase extends BaseDatabase{
+  private tableName: string = process.env.TABLE_NAME_USERS as string
   //TODO: criar método geral para o create e get
   
-  async createAdmin(infos: CreateAdminInfosDTO): Promise<void>{
+  async create(infos: CreateUserInfosDTO): Promise<void>{
     try{
      await this.getConnection()
       .insert(infos)
@@ -17,20 +17,23 @@ export class AdminsDatabase extends BaseDatabase{
   }
 
   async getByEmailIdOrNick(
-    email: string, id?:string, nickname?:string
-    ): Promise<AdminInfosDTO>{
-    try{
+    value: string, fieldName: string
+    ): Promise<UserInfosDTO | false>{
+    try{ 
       const result = await this.getConnection()
       .select('*')
       .from(this.tableName)
-      .where(email ? {email} : {id}  || {nickname})
+      .where(fieldName,'=', value)
 
       return result.length === 1 && {
         id: result[0].id,
         email: result[0].email,
         name: result[0].name,
         nickname: result[0].nickname,
-        password: result[0].password
+        password: result[0].password,
+        role: result[0].role,
+        blocked: result[0].blocked,
+        subscriber: result[0].subscriber
       }
     }catch(error){
       throw new CustomError(400, (error.message || error.sqlMessage))

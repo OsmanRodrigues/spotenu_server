@@ -10,7 +10,6 @@ import { BandsDatabase } from "../data/BandsDatabase";
 
 export class UsersBusiness{
   //TODO: tratar erros
-  //TODO: ajustar a role
   
   async signup(infos: SignupInfosDTO, token?: string): Promise<{}>{
     try{
@@ -39,7 +38,7 @@ export class UsersBusiness{
 
   async login(infos: LoginInfosDTO): Promise<any>{
     const useLoginChecker = new LoginChecker(infos)
-    useLoginChecker.checkInfos()
+    useLoginChecker.generalCheck()
 
     try{
       const dbResult = await new UsersDatabase().getByEmailIdOrNick(

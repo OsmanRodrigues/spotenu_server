@@ -1,14 +1,16 @@
 import { LoginInfosDTO, CheckPasswordInput } from "../model/Shapes";
-import {Authenticator} from "../utils/Authenticator";
 import { HashManager } from "../utils/HashManager";
 import { CustomError } from "../error/CustomError";
+import { InfosChecker } from "../model/InfosChecker";
 
-export class LoginChecker{
+export class LoginChecker extends InfosChecker{
   constructor(
     public infos: LoginInfosDTO
-  ){}
+  ){
+    super(infos)
+  }
   //TODO: tratar erros
-  checkInfos(): void{
+  generalCheck(): void{
     if(! this.infos.password){
       throw new CustomError(400, 'Missing password')
     }else if(! this.infos.email && ! this.infos.nickname){

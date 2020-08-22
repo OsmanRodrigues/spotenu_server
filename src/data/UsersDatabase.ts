@@ -4,7 +4,6 @@ import { CustomError } from "../error/CustomError";
 
 export class UsersDatabase extends BaseDatabase{
   private tableName: string = process.env.TABLE_NAME_USERS as string
-  //TODO: criar método geral para o create e get
   
   async create(infos: CreateUserInfosDTO): Promise<void>{
     try{

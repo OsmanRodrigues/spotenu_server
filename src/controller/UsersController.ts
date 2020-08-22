@@ -25,10 +25,11 @@ export class UsersController{
       .send({
         errorMessage: error.message
       })
+
+      await BaseDatabase.destroyConnection()
     }
   }
 
-  //TODO: validar login
   async login(req: Request, res: Response){
     try{
       const body = req.body
@@ -47,6 +48,8 @@ export class UsersController{
       .send({
         errorMessage: error.message
       })
+
+      await BaseDatabase.destroyConnection()
     }
   }
 
@@ -68,6 +71,8 @@ export class UsersController{
       .send({
         errorMessage: error.message
       })
+
+      await BaseDatabase.destroyConnection()
     }
   }
 }

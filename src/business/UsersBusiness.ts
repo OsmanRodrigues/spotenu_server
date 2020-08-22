@@ -1,11 +1,12 @@
 import { UsersDatabase } from "../data/UsersDatabase";
-import { LoginInfosDTO, SignupInfosDTO, ROLE, GETBY_FIELDNAME } from "../model/Shapes";
+import { LoginInfosDTO, SignupInfosDTO, ROLE, GETBY_FIELDNAME, ConvertToBandInfosDTO } from "../model/Shapes";
 import { CustomError } from "../error/CustomError";
 import { HashManager } from "../utils/HashManager";
 import { IdGenerator } from "../utils/IdGenerator";
 import {Authenticator} from "../utils/Authenticator";
 import { LoginChecker } from "../utils/LoginChecker";
 import { SignupChecker } from "../utils/SignupChecker";
+import { BandsDatabase } from "../data/BandsDatabase";
 
 export class UsersBusiness{
   //TODO: tratar erros
@@ -61,5 +62,30 @@ export class UsersBusiness{
     }catch(error){
       throw new CustomError(400, error.message)
     }    
+  }
+
+  async registerBand(
+    infos: {description: string, membersQuantity?: number}, 
+    token: string
+    ): Promise<{}>{
+    try{
+      if(!infos.description){
+        throw new CustomError(400, 'Missing description.')
+      }else if(!token){
+        throw new CustomError(400, 'Missing token.')
+      }
+
+      const tokenInfos = new Authenticator().getData(token)
+
+      await new BandsDatabase().convertToBand({
+        description: infos.description,
+        id: tokenInfos.id,
+        membersQuantity: infos.membersQuantity
+      })
+
+      return{message:"Band successfully registered! Await for Admin's approval."}
+    }catch(error){
+      throw new CustomError(400, error.message)
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SignupInfosDTO, LoginInfosDTO } from "../model/Shapes";
+import { SignupInfosDTO, LoginInfosDTO, ConvertToBandInfosDTO } from "../model/Shapes";
 import { BaseDatabase } from "../model/BaseDatabase";
 import { UsersBusiness } from "../business/UsersBusiness";
 
@@ -38,6 +38,27 @@ export class UsersController{
         nickname: body.nickname
       }
       const result = await new UsersBusiness().login(infos)
+
+      res.status(200).send(result)
+
+      await BaseDatabase.destroyConnection()
+    }catch (error){
+      res.status(error.status) 
+      .send({
+        errorMessage: error.message
+      })
+    }
+  }
+
+  async registerBand(req: Request, res: Response){
+    try{
+      const token = req.headers.authorization
+      const body = req.body
+      const infos = {
+        description: body.description,
+        membersQuantity: body.membersQuantity
+      }
+      const result = await new UsersBusiness().registerBand(infos, token)
 
       res.status(200).send(result)
 

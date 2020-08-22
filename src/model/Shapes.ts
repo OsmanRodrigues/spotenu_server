@@ -18,14 +18,6 @@ interface AuthenticationData{
   device?: string
 };
 
-interface CreateAdminInfosDTO{
-  email: string,
-  name: string,
-  password: string,
-  id?: string,
-  nickname?: string
-}
-
 interface CreateUserInfosDTO{
   id: string,
   email: string,
@@ -33,6 +25,12 @@ interface CreateUserInfosDTO{
   password: string,
   role: string,
   nickname?: string
+}
+
+interface ConvertToBandInfosDTO{
+  id: string,
+  description: string,
+  membersQuantity?: number
 }
 
 interface SignupInfosDTO{
@@ -54,14 +52,6 @@ interface LoginInfosDTO{
   nickname?: string
 }
 
-interface AdminInfosDTO{
-  id: string,
-  email: string,
-  name: string,
-  nickname: string,
-  password: string
-}
-
 interface UserInfosDTO{
   id: string,
   email: string,
@@ -70,7 +60,10 @@ interface UserInfosDTO{
   password: string,
   role: string,
   subscriber: number,
-  blocked: number
+  blocked: number,
+  description?: string,
+  membersQuantity?: number,
+  approved?: number 
 }
 
 interface CheckPasswordInput{
@@ -79,7 +72,7 @@ interface CheckPasswordInput{
 }
 
 export {
-  ROLE, AuthenticationData, CreateAdminInfosDTO, LoginInfosDTO, 
-  SignupInfosDTO, AdminInfosDTO, CheckPasswordInput, CreateUserInfosDTO,
-  UserInfosDTO, GETBY_FIELDNAME
+  ROLE, AuthenticationData, LoginInfosDTO, 
+  SignupInfosDTO, CheckPasswordInput, CreateUserInfosDTO,
+  UserInfosDTO, GETBY_FIELDNAME, ConvertToBandInfosDTO
 }

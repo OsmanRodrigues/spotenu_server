@@ -10,6 +10,7 @@ import { BandsDatabase } from "../data/BandsDatabase";
 
 export class UsersBusiness{
   //TODO: tratar erros
+  //TODO: validar tamanho das senhas
   
   async signup(infos: SignupInfosDTO, token?: string): Promise<{}>{
     try{
@@ -18,7 +19,6 @@ export class UsersBusiness{
 
       const hashedPassword = await new HashManager().hash(infos.password) 
       const id = new IdGenerator().generate()
-      //valida o nickname
       await new UsersDatabase().create({
         id,
         email: infos.email,
@@ -46,15 +46,19 @@ export class UsersBusiness{
         infos.email ? GETBY_FIELDNAME.EMAIL : GETBY_FIELDNAME.NICKNAME
       )
       if(dbResult){
+        const result = await useLoginChecker.checkIfHasAnyRestriction(dbResult)
         await useLoginChecker.checkPassword({
           hashedPassword: dbResult.password,
           plainPassword: infos.password
         })
 
-        return new Authenticator().generateAccessToken({
-          id: dbResult.id,
-          role: dbResult.role
-        }) 
+        return{
+          accessToken: new Authenticator().generateAccessToken({
+            id: dbResult.id,
+            role: dbResult.role
+          }).accessToken,
+          alert: result ? result.message : 'No alerts.'
+        } 
       }else{
         throw new CustomError(400, 'User not found.')
       }

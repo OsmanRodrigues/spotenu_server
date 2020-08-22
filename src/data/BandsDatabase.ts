@@ -1,5 +1,5 @@
 import { BaseDatabase } from "../model/BaseDatabase";
-import { ROLE, ConvertToBandInfosDTO } from "../model/Shapes";
+import { ROLE, ConvertToBandInfosDTO, UserInfosDTO } from "../model/Shapes";
 import { CustomError } from "../error/CustomError";
 
 export class BandsDatabase extends BaseDatabase{
@@ -25,4 +25,32 @@ export class BandsDatabase extends BaseDatabase{
     }
   }
 
+  async getById(id: string): Promise<UserInfosDTO>{
+    try{
+      const result = await this.getConnection()
+      .from(this.usersTableName)
+      .innerJoin(
+        this.bandsTableName, 
+        `${this.usersTableName}.id`, 
+        `${this.bandsTableName}.band_id`
+      )
+      .where({id})
+
+      return{
+        id: result[0].id,
+        email: result[0].email,
+        name: result[0].name,
+        nickname: result[0].nickname,
+        password: result[0].password,
+        role: result[0].role,
+        description: result[0].description,
+        membersQuantity: result[0].members_quantity,
+        approved: result[0].approved, 
+        blocked: result[0].blocked,
+        subscriber: result[0].subscriber
+      }
+    }catch(error){
+      throw new CustomError(400, (error.message || error.sqlMessage))
+    }
+  }
 }

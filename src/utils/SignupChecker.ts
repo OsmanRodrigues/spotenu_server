@@ -20,6 +20,8 @@ export class SignupChecker extends InfosChecker{
       throw new CustomError(400, 'Missing name.')
     }else if(!this.infos.password){
       throw new CustomError(400, 'Missing password.')
+    }else if(this.infos.password.length < 6){
+      throw new CustomError(400, 'Password must have 6 characters or more.')
     }
   }
 
@@ -43,9 +45,13 @@ export class SignupChecker extends InfosChecker{
     }
   }
   
-  private checkIfIsAdmin(tokenInfos: AuthenticationData){
+  private adminsCheck(tokenInfos: AuthenticationData){
     if(tokenInfos.role != ROLE.ADMIN){
       throw new CustomError(400, "Action allowed only to Admins.");
+    }else{
+      if(this.infos.password.length < 10){
+        throw new CustomError(400, 'Admins password must have 10 characters or more.')
+      }
     }
   }
 
@@ -55,10 +61,10 @@ export class SignupChecker extends InfosChecker{
     if(this.token){
       const useAuthenticator = new Authenticator()
       useAuthenticator.checkToken(this.token)
-      const userInfos = useAuthenticator.getData(this.token)
-      this.checkIfIsAdmin(userInfos)
+      const tokenInfos = useAuthenticator.getData(this.token)
+      this.adminsCheck(tokenInfos)
       
-      return userInfos
+      return tokenInfos
     }
   }
 }

@@ -1,5 +1,5 @@
 import { UsersDatabase } from "../data/UsersDatabase";
-import { LoginInfosDTO, SignupInfosDTO, ROLE, GETBY_FIELDNAME, ConvertToBandInfosDTO } from "../model/Shapes";
+import { LoginInfosDTO, SignupInfosDTO, ROLE, GETBY_FIELDNAME, GetBandsOutput } from "../model/Shapes";
 import { CustomError } from "../error/CustomError";
 import { HashManager } from "../utils/HashManager";
 import { IdGenerator } from "../utils/IdGenerator";
@@ -10,7 +10,6 @@ import { BandsDatabase } from "../data/BandsDatabase";
 
 export class UsersBusiness{
   //TODO: tratar erros
-  //TODO: validar tamanho das senhas
   
   async signup(infos: SignupInfosDTO, token?: string): Promise<{}>{
     try{
@@ -70,7 +69,7 @@ export class UsersBusiness{
   async registerBand(
     infos: {description: string, membersQuantity?: number}, 
     token: string
-    ): Promise<{}>{
+    ): Promise<{message: string}>{
     try{
       if(!infos.description){
         throw new CustomError(400, 'Missing description.')
@@ -88,6 +87,52 @@ export class UsersBusiness{
 
       return{message:"Band successfully registered! Await for Admin's approval."}
     }catch(error){
+      throw new CustomError(400, error.message)
+    }
+  }
+
+  async approveBand(bandId: string,token: string): Promise<{message: string}>{
+    try{
+      const tokenInfos = new Authenticator().getData(token)
+
+      if(tokenInfos.role != ROLE.ADMIN){
+        throw new CustomError(400, "Action allowed only to Admins.")
+      }else if(!bandId){
+        throw new CustomError(400, "Band id must be provided.")
+      }
+
+      const approveBand = await new BandsDatabase().approve(bandId)
+
+      return{
+        message: approveBand === 1 ? 
+        'Band successfully approved!' :
+        'Band id not found.' 
+      }
+    }catch(error){
+      throw new CustomError(400, error.message)
+    }
+  }
+
+  async getAllBands(token: string): Promise<{bandsList: GetBandsOutput[]}>{
+    try{
+      const tokenInfos = new Authenticator().getData(token)
+
+      if(tokenInfos.role != ROLE.ADMIN){
+        throw new CustomError(400, "Action allowed only to Admins.")
+      }
+
+      const allBandsInfos = await new BandsDatabase().getAll()
+
+      const bandsList = allBandsInfos.map((band):GetBandsOutput =>{
+        return{
+          name: band.name,
+          email: band.email,
+          nickname: band.nickname,
+          approved: band.approved === 1 ? true : false
+        }
+      })
+      return {bandsList}
+    }catch(error) {
       throw new CustomError(400, error.message)
     }
   }

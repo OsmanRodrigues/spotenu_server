@@ -25,6 +25,22 @@ export class BandsDatabase extends BaseDatabase{
     }
   }
 
+  async getAll(): Promise<UserInfosDTO[]>{
+    try{
+      const result: UserInfosDTO[] = await this.getConnection()
+      .from(this.usersTableName)
+      .innerJoin(
+        this.bandsTableName, 
+        `${this.usersTableName}.id`, 
+        `${this.bandsTableName}.band_id`
+      )
+      
+      return result
+    }catch (error){
+      throw new CustomError(400, (error.message || error.sqlMessage))
+    }
+  }
+
   async getById(id: string): Promise<UserInfosDTO>{
     try{
       const result = await this.getConnection()
@@ -49,6 +65,19 @@ export class BandsDatabase extends BaseDatabase{
         blocked: result[0].blocked,
         subscriber: result[0].subscriber
       }
+    }catch(error){
+      throw new CustomError(400, (error.message || error.sqlMessage))
+    }
+  }
+
+  async approve(id: string): Promise<number>{
+    try{
+      const connection = this.getConnection()
+      const result = await connection(this.bandsTableName)
+      .where({band_id: id})
+      .update({approved: 1})
+
+      return result
     }catch(error){
       throw new CustomError(400, (error.message || error.sqlMessage))
     }

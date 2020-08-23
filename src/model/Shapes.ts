@@ -71,8 +71,16 @@ interface CheckPasswordInput{
   plainPassword: string
 }
 
+interface GetBandsOutput{
+  name: string,
+  email: string,
+  nickname: string,
+  approved: boolean 
+}
+
 export {
   ROLE, AuthenticationData, LoginInfosDTO, 
   SignupInfosDTO, CheckPasswordInput, CreateUserInfosDTO,
-  UserInfosDTO, GETBY_FIELDNAME, ConvertToBandInfosDTO
+  UserInfosDTO, GETBY_FIELDNAME, ConvertToBandInfosDTO,
+  GetBandsOutput
 }

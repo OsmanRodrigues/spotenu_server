@@ -1,5 +1,5 @@
 import { UsersDatabase } from "../data/UsersDatabase";
-import { LoginInfosDTO, SignupInfosDTO, ROLE, GETBY_FIELDNAME, ConvertToBandInfosDTO } from "../model/Shapes";
+import { LoginInfosDTO, SignupInfosDTO, ROLE, GETBY_FIELDNAME, GetBandsOutput } from "../model/Shapes";
 import { CustomError } from "../error/CustomError";
 import { HashManager } from "../utils/HashManager";
 import { IdGenerator } from "../utils/IdGenerator";
@@ -10,7 +10,6 @@ import { BandsDatabase } from "../data/BandsDatabase";
 
 export class UsersBusiness{
   //TODO: tratar erros
-  //TODO: ajustar a role
   
   async signup(infos: SignupInfosDTO, token?: string): Promise<{}>{
     try{
@@ -19,7 +18,6 @@ export class UsersBusiness{
 
       const hashedPassword = await new HashManager().hash(infos.password) 
       const id = new IdGenerator().generate()
-      //valida o nickname
       await new UsersDatabase().create({
         id,
         email: infos.email,
@@ -39,7 +37,7 @@ export class UsersBusiness{
 
   async login(infos: LoginInfosDTO): Promise<any>{
     const useLoginChecker = new LoginChecker(infos)
-    useLoginChecker.checkInfos()
+    useLoginChecker.generalCheck()
 
     try{
       const dbResult = await new UsersDatabase().getByEmailIdOrNick(
@@ -47,15 +45,19 @@ export class UsersBusiness{
         infos.email ? GETBY_FIELDNAME.EMAIL : GETBY_FIELDNAME.NICKNAME
       )
       if(dbResult){
+        const result = await useLoginChecker.checkIfHasAnyRestriction(dbResult)
         await useLoginChecker.checkPassword({
           hashedPassword: dbResult.password,
           plainPassword: infos.password
         })
 
-        return new Authenticator().generateAccessToken({
-          id: dbResult.id,
-          role: dbResult.role
-        }) 
+        return{
+          accessToken: new Authenticator().generateAccessToken({
+            id: dbResult.id,
+            role: dbResult.role
+          }).accessToken,
+          alert: result ? result.message : 'No alerts.'
+        } 
       }else{
         throw new CustomError(400, 'User not found.')
       }
@@ -67,7 +69,7 @@ export class UsersBusiness{
   async registerBand(
     infos: {description: string, membersQuantity?: number}, 
     token: string
-    ): Promise<{}>{
+    ): Promise<{message: string}>{
     try{
       if(!infos.description){
         throw new CustomError(400, 'Missing description.')
@@ -85,6 +87,52 @@ export class UsersBusiness{
 
       return{message:"Band successfully registered! Await for Admin's approval."}
     }catch(error){
+      throw new CustomError(400, error.message)
+    }
+  }
+
+  async approveBand(bandId: string,token: string): Promise<{message: string}>{
+    try{
+      const tokenInfos = new Authenticator().getData(token)
+
+      if(tokenInfos.role != ROLE.ADMIN){
+        throw new CustomError(400, "Action allowed only to Admins.")
+      }else if(!bandId){
+        throw new CustomError(400, "Band id must be provided.")
+      }
+
+      const approveBand = await new BandsDatabase().approve(bandId)
+
+      return{
+        message: approveBand === 1 ? 
+        'Band successfully approved!' :
+        'Band id not found.' 
+      }
+    }catch(error){
+      throw new CustomError(400, error.message)
+    }
+  }
+
+  async getAllBands(token: string): Promise<{bandsList: GetBandsOutput[]}>{
+    try{
+      const tokenInfos = new Authenticator().getData(token)
+
+      if(tokenInfos.role != ROLE.ADMIN){
+        throw new CustomError(400, "Action allowed only to Admins.")
+      }
+
+      const allBandsInfos = await new BandsDatabase().getAll()
+
+      const bandsList = allBandsInfos.map((band):GetBandsOutput =>{
+        return{
+          name: band.name,
+          email: band.email,
+          nickname: band.nickname,
+          approved: band.approved === 1 ? true : false
+        }
+      })
+      return {bandsList}
+    }catch(error) {
       throw new CustomError(400, error.message)
     }
   }

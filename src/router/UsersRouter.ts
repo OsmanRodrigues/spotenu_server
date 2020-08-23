@@ -5,5 +5,6 @@ export const usersRouter = express.Router()
 
 usersRouter.post('/signup', new UsersController().signup)
 usersRouter.post('/login', new UsersController().login)
-//TODO: incluir pathparams para pegar o id
-usersRouter.post('/bands', new UsersController().registerBand)
+usersRouter.post('/band', new UsersController().registerBand)
+usersRouter.get('/band', new UsersController().getAllBands)
+usersRouter.put('/band/approve', new UsersController().approveBand)

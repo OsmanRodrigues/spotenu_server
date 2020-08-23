@@ -2,24 +2,26 @@ import { ROLE, SignupInfosDTO, AuthenticationData, GETBY_FIELDNAME } from "../mo
 import { CustomError } from "../error/CustomError";
 import { Authenticator } from "./Authenticator";
 import { UsersDatabase } from "../data/UsersDatabase";
-import { compareSync } from "bcryptjs";
+import { InfosChecker } from "../model/InfosChecker";
 
-export class SignupChecker{
+export class SignupChecker extends InfosChecker{
   constructor(
     public infos: SignupInfosDTO,
     public dbGetter: UsersDatabase,
     public token?: string
-  ){}
-  //TODO: tratar erros
-  //TODO: remover a checkagem por envio de role
+  ){
+    super(infos)
+  }
 
-  private checkGeneralInfos(){
+  generalCheck(){
     if(!this.infos.email){
       throw new CustomError(400, 'Missing e-mail.')
     }else if(!this.infos.name){
       throw new CustomError(400, 'Missing name.')
     }else if(!this.infos.password){
       throw new CustomError(400, 'Missing password.')
+    }else if(this.infos.password.length < 6){
+      throw new CustomError(400, 'Password must have 6 characters or more.')
     }
   }
 
@@ -36,29 +38,33 @@ export class SignupChecker{
     }else if(nickResult != false && ! this.infos.nickname ){
       throw new CustomError(
         400, 
-        'Nickname is the same as the name and it already exists. Inform another name or nickname.'
+        'Nickname is the same as the name and it already in use. Inform another name or nickname.'
       )
     }else if(nickResult != false){
-      throw new CustomError(400, 'Nickname already exists.')
+      throw new CustomError(400, 'Nickname already in use.')
     }
   }
   
-  private checkIfIsAdmin(tokenInfos: AuthenticationData){
+  private adminsCheck(tokenInfos: AuthenticationData){
     if(tokenInfos.role != ROLE.ADMIN){
       throw new CustomError(400, "Action allowed only to Admins.");
+    }else{
+      if(this.infos.password.length < 10){
+        throw new CustomError(400, 'Admins password must have 10 characters or more.')
+      }
     }
   }
 
   async fullCheck(): Promise<AuthenticationData | void>{
-    this.checkGeneralInfos()
+    this.generalCheck()
     await this.checkNickAndEmailInDb()
     if(this.token){
       const useAuthenticator = new Authenticator()
       useAuthenticator.checkToken(this.token)
-      const userInfos = useAuthenticator.getData(this.token)
-      this.checkIfIsAdmin(userInfos)
+      const tokenInfos = useAuthenticator.getData(this.token)
+      this.adminsCheck(tokenInfos)
       
-      return userInfos
+      return tokenInfos
     }
   }
 }

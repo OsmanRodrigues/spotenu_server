@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SignupInfosDTO, LoginInfosDTO, ConvertToBandInfosDTO } from "../model/Shapes";
+import { SignupInfosDTO, LoginInfosDTO } from "../model/Shapes";
 import { BaseDatabase } from "../model/BaseDatabase";
 import { UsersBusiness } from "../business/UsersBusiness";
 
@@ -28,7 +28,6 @@ export class UsersController{
     }
   }
 
-  //TODO: validar login
   async login(req: Request, res: Response){
     try{
       const body = req.body
@@ -59,6 +58,40 @@ export class UsersController{
         membersQuantity: body.membersQuantity
       }
       const result = await new UsersBusiness().registerBand(infos, token)
+
+      res.status(200).send(result)
+
+      await BaseDatabase.destroyConnection()
+    }catch (error){
+      res.status(error.status) 
+      .send({
+        errorMessage: error.message
+      })
+    }
+  }
+
+  async getAllBands(req: Request, res: Response){
+    try{
+      const token = req.headers.authorization
+      const result = await new UsersBusiness().getAllBands(token)
+
+      res.status(200).send(result)
+
+      await BaseDatabase.destroyConnection()
+    }catch (error){
+      res.status(error.status) 
+      .send({
+        errorMessage: error.message
+      })
+    }
+  }
+
+  async approveBand(req: Request, res: Response){
+    try{
+      const token = req.headers.authorization
+      const bandId = req.body.id
+
+      const result = await new UsersBusiness().approveBand(bandId,token)
 
       res.status(200).send(result)
 

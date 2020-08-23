@@ -1,14 +1,17 @@
-import { LoginInfosDTO, CheckPasswordInput } from "../model/Shapes";
-import {Authenticator} from "../utils/Authenticator";
+import { LoginInfosDTO, CheckPasswordInput, UserInfosDTO, ROLE, AuthenticationData } from "../model/Shapes";
 import { HashManager } from "../utils/HashManager";
 import { CustomError } from "../error/CustomError";
+import { InfosChecker } from "../model/InfosChecker";
+import { BandsDatabase } from "../data/BandsDatabase";
 
-export class LoginChecker{
+export class LoginChecker extends InfosChecker{
   constructor(
-    public infos: LoginInfosDTO
-  ){}
+    public infos: LoginInfosDTO,
+  ){
+    super(infos)
+  }
   //TODO: tratar erros
-  checkInfos(): void{
+  generalCheck(): void{
     if(! this.infos.password){
       throw new CustomError(400, 'Missing password')
     }else if(! this.infos.email && ! this.infos.nickname){
@@ -26,4 +29,22 @@ export class LoginChecker{
       throw new CustomError(400, 'Invalid password.')
     }
   }
+
+  async checkIfHasAnyRestriction(infos: UserInfosDTO): Promise<void|{message: string}>{
+    if(infos.blocked === 1){
+      throw new CustomError(400, 'Not allowed. Blocked User.')
+    }else{
+      if(infos.role === ROLE.BAND){
+        const result = await new BandsDatabase().getById(infos.id)
+        
+        if(result.approved === 0){
+          return {message: 'Band registration not yet approved.'}
+        }
+      }
+    }
+  }
+
+  //async fullCheck(): Promise<AuthenticationData | void>{
+  //  this.generalCheck()
+  //}
 }

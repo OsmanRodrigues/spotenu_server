@@ -10,12 +10,12 @@ export class LoginChecker extends InfosChecker{
   ){
     super(infos)
   }
-  //TODO: tratar erros
+  
   generalCheck(): void{
     if(! this.infos.password){
-      throw new CustomError(400, 'Missing password')
+      throw new CustomError(416, 'Missing password')
     }else if(! this.infos.email && ! this.infos.nickname){
-      throw new CustomError(400, 'Needs email or nickname to login.')
+      throw new CustomError(416, 'Needs email or nickname to login.')
     }
   }
   
@@ -26,13 +26,13 @@ export class LoginChecker extends InfosChecker{
     if(passwordIsValid){
       return passwordIsValid 
     }else{
-      throw new CustomError(400, 'Invalid password.')
+      throw new CustomError(401, 'Invalid password.')
     }
   }
 
   async checkIfHasAnyRestriction(infos: UserInfosDTO): Promise<void|{message: string}>{
     if(infos.blocked === 1){
-      throw new CustomError(400, 'Not allowed. Blocked User.')
+      throw new CustomError(401, 'Not allowed. Blocked User.')
     }else{
       if(infos.role === ROLE.BAND){
         const result = await new BandsDatabase().getById(infos.id)
@@ -43,8 +43,4 @@ export class LoginChecker extends InfosChecker{
       }
     }
   }
-
-  //async fullCheck(): Promise<AuthenticationData | void>{
-  //  this.generalCheck()
-  //}
 }

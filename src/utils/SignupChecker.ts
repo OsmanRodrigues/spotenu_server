@@ -15,13 +15,13 @@ export class SignupChecker extends InfosChecker{
 
   generalCheck(){
     if(!this.infos.email){
-      throw new CustomError(400, 'Missing e-mail.')
+      throw new CustomError(416, 'Missing e-mail.')
     }else if(!this.infos.name){
-      throw new CustomError(400, 'Missing name.')
+      throw new CustomError(416, 'Missing name.')
     }else if(!this.infos.password){
-      throw new CustomError(400, 'Missing password.')
+      throw new CustomError(416, 'Missing password.')
     }else if(this.infos.password.length < 6){
-      throw new CustomError(400, 'Password must have 6 characters or more.')
+      throw new CustomError(411, 'Password must have 6 characters or more.')
     }
   }
 
@@ -34,23 +34,23 @@ export class SignupChecker extends InfosChecker{
     )
 
     if(emailResult != false){
-      throw new CustomError(400, 'E-mail already in use.')
+      throw new CustomError(409, 'E-mail already in use.')
     }else if(nickResult != false && ! this.infos.nickname ){
       throw new CustomError(
-        400, 
+        409, 
         'Nickname is the same as the name and it already in use. Inform another name or nickname.'
       )
     }else if(nickResult != false){
-      throw new CustomError(400, 'Nickname already in use.')
+      throw new CustomError(409, 'Nickname already in use.')
     }
   }
   
   private adminsCheck(tokenInfos: AuthenticationData){
     if(tokenInfos.role != ROLE.ADMIN){
-      throw new CustomError(400, "Action allowed only to Admins.");
+      throw new CustomError(401, "Action allowed only to Admins.");
     }else{
       if(this.infos.password.length < 10){
-        throw new CustomError(400, 'Admins password must have 10 characters or more.')
+        throw new CustomError(411, 'Admins password must have 10 characters or more.')
       }
     }
   }

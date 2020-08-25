@@ -8,9 +8,7 @@ import { LoginChecker } from "../utils/LoginChecker";
 import { SignupChecker } from "../utils/SignupChecker";
 import { BandsDatabase } from "../data/BandsDatabase";
 
-export class UsersBusiness{
-  //TODO: tratar erros
-  
+export class UsersBusiness{  
   async signup(infos: SignupInfosDTO, token?: string): Promise<{}>{
     try{
       const useSignupChecker = new SignupChecker(infos, new UsersDatabase(), token)
@@ -59,7 +57,7 @@ export class UsersBusiness{
           alert: result ? result.message : 'No alerts.'
         } 
       }else{
-        throw new CustomError(400, 'User not found.')
+        throw new CustomError(404, 'User not found.')
       }
     }catch(error){
       throw new CustomError(400, error.message)
@@ -72,9 +70,9 @@ export class UsersBusiness{
     ): Promise<{message: string}>{
     try{
       if(!infos.description){
-        throw new CustomError(400, 'Missing description.')
+        throw new CustomError(416, 'Missing description.')
       }else if(!token){
-        throw new CustomError(400, 'Missing token.')
+        throw new CustomError(416, 'Missing token.')
       }
 
       const tokenInfos = new Authenticator().getData(token)
@@ -96,9 +94,9 @@ export class UsersBusiness{
       const tokenInfos = new Authenticator().getData(token)
 
       if(tokenInfos.role != ROLE.ADMIN){
-        throw new CustomError(400, "Action allowed only to Admins.")
+        throw new CustomError(401, "Action allowed only to Admins.")
       }else if(!bandId){
-        throw new CustomError(400, "Band id must be provided.")
+        throw new CustomError(416, "Band id must be provided.")
       }
 
       const approveBand = await new BandsDatabase().approve(bandId)
@@ -118,7 +116,7 @@ export class UsersBusiness{
       const tokenInfos = new Authenticator().getData(token)
 
       if(tokenInfos.role != ROLE.ADMIN){
-        throw new CustomError(400, "Action allowed only to Admins.")
+        throw new CustomError(401, "Action allowed only to Admins.")
       }
 
       const allBandsInfos = await new BandsDatabase().getAll()
